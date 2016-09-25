@@ -35,19 +35,26 @@ let () =
   in
 
   let camera = Camera.make () in
+
+  let sample i j = 
+    let sx = Random.float 1.0 in
+    let sy = Random.float 1.0 in
+    let u = (float_of_int i +. sx) /. float_of_int nx in
+    let v = (float_of_int j +. sy) /. float_of_int ny in
+    let ray = Camera.ray camera u v in
+    color ray world
+  in
+
   for j = ny - 1 downto 0 do
     for i = 0 to nx - 1 do
-      let f col _ = 
-        let sx = Random.float 1.0 in
-        let sy = Random.float 1.0 in
-        let u = (float_of_int i +. sx) /. float_of_int nx in
-        let v = (float_of_int j +. sy) /. float_of_int ny in
-        let ray = Camera.ray camera u v in
-        col +| (color ray world)
+      let rec loop c = function
+        | 0 -> c
+        | _ as cnt -> 
+            let c' = c +| (sample i j) in
+            loop c' (cnt - 1) 
       in
-      let repeat = Enum.repeat ~times:ns () in
-      let col = Enum.fold f Vec3.zero repeat in 
-      print_color (col /| float_of_int ns)
+      let color = loop Vec3.zero ns in
+      print_color (color /| float_of_int ns)
     done
   done
   
