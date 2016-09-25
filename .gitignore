@@ -7,12 +7,18 @@
 *.cmx
 *.cmxs
 *.cmxa
+
+# omake
 *.omc
 *.omakedb
 *.omakedb.lock
-*.swp
+
+# omake targets
 *.run
 *.opt
+
+# vim backup
+*.swp
 
 # ocamlbuild working directory
 _build/
@@ -24,3 +30,6 @@ _build/
 # oasis generated files
 setup.data
 setup.log
+
+# program
+raytrace
