@@ -1,6 +1,41 @@
 open Batteries
+open Bigarray
 open Vec3
 
+module Pixbuf = struct
+  type t = {
+    width : int;
+    height : int;
+    pixels : (float, float32_elt, c_layout) Array2.t;
+  }
+
+  let make w h =
+    let pixels = Array2.create float32 c_layout (w*3) h in
+    {
+      width = w;
+      height = h;
+      pixels = pixels;
+    }
+
+
+  let write_ppm { width=w; height=h; pixels=pixels; } =
+    Printf.printf "P3\n%d %d\n255\n" w h;
+  
+    let print_color x y = 
+      let f x = int_of_float (255.99 *. x) in
+      let r = f @@ pixels.{x*3, y} in
+      let g = f @@ pixels.{x*3+1, y} in
+      let b = f @@ pixels.{x*3+2, y} in
+      Printf.printf "%d %d %d\n" r g b 
+    in
+  
+    for j = h - 1 downto 0 do
+      for i = 0 to w - 1 do
+        print_color i j
+      done
+    done
+end
+    
 let color ray world = 
   let hit = World.hit world ray 0.0 infinity in
   match hit with
@@ -18,15 +53,7 @@ let () =
   let ny = 100 in
   let ns = 100 in
 
-  Printf.printf "P3\n%d %d\n255\n" nx ny;
-
-  let print_color c = 
-    let f x = int_of_float (255.99 *. x) in
-    let r = f @@ c.(0) in
-    let g = f @@ c.(1) in
-    let b = f @@ c.(2) in
-    Printf.printf "%d %d %d\n" r g b 
-  in
+  let pixbuf = Pixbuf.make nx ny in
 
   let world = [
     Shape.sphere (Vec3.make 0.0 0.0 (-1.0)) 0.5;
@@ -53,8 +80,15 @@ let () =
             let c' = c +| (sample i j) in
             loop c' (cnt - 1) 
       in
-      let color = loop Vec3.zero ns in
-      print_color (color /| float_of_int ns)
+      let color = 
+        (loop Vec3.zero ns) /| float_of_int ns 
+      in
+      let pixels = pixbuf.Pixbuf.pixels in
+      pixels.{i*3, j} <- color.(0);
+      pixels.{i*3+1, j} <- color.(1);
+      pixels.{i*3+2, j} <- color.(2)
     done
-  done
+  done;
+
+  Pixbuf.write_ppm pixbuf
   
