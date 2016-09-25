@@ -38,6 +38,7 @@ FILES[] =
 	sphere
 	shape
 	world
+	camera
 	raytrace
 
 PROGRAM = raytrace

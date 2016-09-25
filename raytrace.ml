@@ -16,6 +16,7 @@ let color ray world =
 let () =
   let nx = 200 in
   let ny = 100 in
+  let ns = 100 in
 
   Printf.printf "P3\n%d %d\n255\n" nx ny;
 
@@ -27,28 +28,26 @@ let () =
     Printf.printf "%d %d %d\n" r g b 
   in
 
-  let lower_left_corner = Vec3.make (-2.0) (-1.0) (-1.0) in
-  let horizontal = Vec3.make 4.0 0.0 0.0 in
-  let vertical = Vec3.make 0.0 2.0 0.0 in
-  let origin = Vec3.zero in
-
   let world = [
     Shape.sphere (Vec3.make 0.0 0.0 (-1.0)) 0.5;
     Shape.sphere (Vec3.make 0.0 (-100.5) (-1.0)) 100.0;
   ]
   in
 
+  let camera = Camera.make () in
   for j = ny - 1 downto 0 do
     for i = 0 to nx - 1 do
-      let u = float_of_int i /. float_of_int nx in
-      let v = float_of_int j /. float_of_int ny in
-
-      let direction = 
-        lower_left_corner +| u *| horizontal +| v *| vertical 
+      let f col _ = 
+        let sx = Random.float 1.0 in
+        let sy = Random.float 1.0 in
+        let u = (float_of_int i +. sx) /. float_of_int nx in
+        let v = (float_of_int j +. sy) /. float_of_int ny in
+        let ray = Camera.ray camera u v in
+        col +| (color ray world)
       in
-      let ray = Ray.make origin direction in
-      let col = color ray world in
-      print_color col
+      let repeat = Enum.repeat ~times:ns () in
+      let col = Enum.fold f Vec3.zero repeat in 
+      print_color (col /| float_of_int ns)
     done
   done
   
