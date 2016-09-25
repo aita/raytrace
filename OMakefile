@@ -34,6 +34,10 @@ BYTE_ENABLED = $(not $(OCAMLOPT_EXISTS))
 FILES[] =
 	vec3
 	ray
+	hit
+	sphere
+	shape
+	world
 	raytrace
 
 PROGRAM = raytrace
