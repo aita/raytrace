@@ -32,7 +32,9 @@ BYTE_ENABLED = $(not $(OCAMLOPT_EXISTS))
 
 
 FILES[] =
-   raytrace
+	vec3
+	ray
+	raytrace
 
 PROGRAM = raytrace
 # OCAML_LIBS +=
