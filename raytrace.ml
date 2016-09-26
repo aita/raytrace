@@ -17,15 +17,14 @@ module Pixbuf = struct
       pixels = pixels;
     }
 
-
   let write_ppm { width=w; height=h; pixels=pixels; } =
     Printf.printf "P3\n%d %d\n255\n" w h;
   
     let print_color x y = 
-      let f x = int_of_float (255.99 *. x) in
-      let r = f @@ pixels.{x*3, y} in
-      let g = f @@ pixels.{x*3+1, y} in
-      let b = f @@ pixels.{x*3+2, y} in
+      let byte x = int_of_float (255.99 *. x) in
+      let r = byte pixels.{x*3, y} in
+      let g = byte pixels.{x*3+1, y} in
+      let b = byte pixels.{x*3+2, y} in
       Printf.printf "%d %d %d\n" r g b 
     in
   
@@ -72,7 +71,7 @@ let () =
     color ray world
   in
 
-  for j = ny - 1 downto 0 do
+  for j = 0 to ny - 1 do
     for i = 0 to nx - 1 do
       let rec loop c = function
         | 0 -> c
