@@ -63,26 +63,27 @@ let () =
   let camera = Camera.make () in
 
   let sample i j = 
-    let sx = Random.float 1.0 in
-    let sy = Random.float 1.0 in
-    let u = (float_of_int i +. sx) /. float_of_int nx in
-    let v = (float_of_int j +. sy) /. float_of_int ny in
-    let ray = Camera.ray camera u v in
-    color ray world
+    let next () =
+      let sx = Random.float 1.0 in
+      let sy = Random.float 1.0 in
+      let u = (float_of_int i +. sx) /. float_of_int nx in
+      let v = (float_of_int j +. sy) /. float_of_int ny in
+      let ray = Camera.ray camera u v in
+      color ray world
+    in
+    let rec loop c = function
+      | 0 -> c
+      | _ as cnt -> 
+          let c' = c +| next () in
+          loop c' (cnt - 1) 
+    in
+    (loop Vec3.zero ns) /| float_of_int ns 
   in
 
   for j = 0 to ny - 1 do
     for i = 0 to nx - 1 do
-      let rec loop c = function
-        | 0 -> c
-        | _ as cnt -> 
-            let c' = c +| (sample i j) in
-            loop c' (cnt - 1) 
-      in
-      let color = 
-        (loop Vec3.zero ns) /| float_of_int ns 
-      in
       let pixels = pixbuf.Pixbuf.pixels in
+      let color = sample i j in
       pixels.{i*3, j} <- color.(0);
       pixels.{i*3+1, j} <- color.(1);
       pixels.{i*3+2, j} <- color.(2)
