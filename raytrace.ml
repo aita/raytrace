@@ -34,12 +34,26 @@ module Pixbuf = struct
       done
     done
 end
+
+let random_in_unit_sphere () =
+  let rand bound =
+    Vec3.make (Random.float bound) (Random.float bound) (Random.float bound)
+  in
+  let rec loop p =
+    if Vec3.square_length p >= 1.0 then
+      p
+    else
+      loop (2.0 *| rand 1.0 -| Vec3.one)
+  in
+  loop Vec3.zero
     
-let color ray world = 
-  let hit = World.hit world ray 0.0 infinity in
+let rec color ray world = 
+  let hit = World.hit world ray 0.001 infinity in
   match hit with
   | Some h ->
-      0.5 *| (h.Hit.normal +| Vec3.one)
+      let target = h.Hit.p +| h.Hit.normal +| random_in_unit_sphere () in
+      let ray = Ray.make h.Hit.p (target -| h.Hit.p) in
+      0.5 *| color ray world
   | None ->
       let unit_direction = unit_vector @@ Ray.direction ray in
       let t = 0.5 *. (unit_direction.(1) +. 1.0) in 
@@ -48,8 +62,8 @@ let color ray world =
       a +| b
 
 let () =
-  let nx = 200 in
-  let ny = 100 in
+  let nx = 400 in
+  let ny = 200 in
   let ns = 100 in
 
   let pixbuf = Pixbuf.make nx ny in
@@ -77,7 +91,8 @@ let () =
           let c' = c +| next () in
           loop c' (cnt - 1) 
     in
-    (loop Vec3.zero ns) /| float_of_int ns 
+    let c = (loop Vec3.zero ns) /| float_of_int ns in
+    Array.map sqrt c
   in
 
   for j = 0 to ny - 1 do
